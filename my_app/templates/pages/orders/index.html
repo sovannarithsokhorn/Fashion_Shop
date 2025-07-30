@@ -1,0 +1,85 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Order List - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Order Management</h2>
+            <p class="light-text text-muted-blue">Manage customer orders</p>
+        </div>
+        <a href="{% url 'order_create' %}"
+           class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+            Create New Order
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Orders Table #}
+    <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-cream-light border-b border-cream-border">
+                <tr>
+                    <th class="text-left p-4 light-text text-soft-brown">Order ID</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Customer</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Order Date</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Total Amount</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Status</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Payment</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr class="border-b border-cream-border hover:bg-cream-light">
+                    <td class="p-4 light-text text-accent-brown">#{{ order.order_id }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ order.customer.email|default:"Guest" }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ order.order_date|date:"M d, Y H:i" }}</td>
+                    <td class="p-4 light-text text-soft-brown">${{ order.total_amount|floatformat:2 }}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-full text-xs light-text
+                            {% if order.order_status == 'DELIVERED' %}bg-green-100 text-green-800
+                            {% elif order.order_status == 'SHIPPED' %}bg-blue-100 text-blue-800
+                            {% elif order.order_status == 'CANCELLED' %}bg-red-50 text-red-600 border border-red-200
+                            {% else %}bg-yellow-50 text-yellow-600 border border-yellow-200{% endif %}">
+                            {{ order.order_status }}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-full text-xs light-text
+                            {% if order.payment_status == 'PAID' %}bg-green-100 text-green-800
+                            {% elif order.payment_status == 'REFUNDED' %}bg-red-50 text-red-600 border border-red-200
+                            {% else %}bg-yellow-50 text-yellow-600 border border-yellow-200{% endif %}">
+                            {{ order.payment_status }}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <a href="{% url 'order_edit' pk=order.pk %}" class="text-accent-brown hover:text-opacity-70 mr-3">Edit</a>
+                        <form action="{% url 'order_delete' pk=order.pk %}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete order #{{ order.order_id }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-500 hover:text-red-600">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="p-4 text-center text-warm-gray light-text">No orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

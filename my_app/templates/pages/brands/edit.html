@@ -1,0 +1,76 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Edit Brand: {{ brand.brand_name }} - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Edit Brand: <span class="text-accent-brown">{{ brand.brand_name }}</span></h2>
+            <p class="light-text text-muted-blue">Update brand details</p>
+        </div>
+        <a href="{% url 'brand_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Brands
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'brand_edit' pk=brand.pk %}"> {# Action points to edit_brand view with primary key #}
+        {% csrf_token %}
+
+        {% if general_error %}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="brand_name" class="block text-sm font-medium text-warm-gray mb-1">Brand Name</label>
+                <input type="text" id="brand_name" name="brand_name"
+                       value="{{ brand_data.brand_name|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.brand_name %}border-red-500{% endif %}"
+                       placeholder="e.g., Nike" required>
+                {% if errors.brand_name %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.brand_name }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-warm-gray mb-1">Description (Optional)</label>
+                <textarea id="description" name="description" rows="4"
+                          class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.description %}border-red-500{% endif %}"
+                          placeholder="Enter brand description">{{ brand_data.description|default_if_none:'' }}</textarea>
+                {% if errors.description %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.description }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="website_url" class="block text-sm font-medium text-warm-gray mb-1">Website URL (Optional)</label>
+                <input type="url" id="website_url" name="website_url"
+                       value="{{ brand_data.website_url|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.website_url %}border-red-500{% endif %}"
+                       placeholder="e.g., https://www.example.com">
+                {% if errors.website_url %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.website_url }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Update Brand</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

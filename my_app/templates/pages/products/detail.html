@@ -1,0 +1,141 @@
+{% extends 'index.html' %} {# Corrected: Extending index.html as requested #}
+{% load static %}
+
+{% block title %}{{ product.product_name }} - Product Details{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl thin-text text-gray-800 mb-2">{{ product.product_name }}</h2>
+            <p class="light-text text-muted-blue">Detailed view of your product</p>
+        </div>
+        <div class="space-x-3">
+            <a href="{% url 'product_edit' pk=product.product_id %}"
+               class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+                Edit Product
+            </a>
+            <a href="{% url 'product_index' %}"
+               class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+                Back to Products
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {# Product Images Section #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Product Images</h3>
+            {% if images %}
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {% for image in images %}
+                        <div class="relative bg-cream-light rounded-lg overflow-hidden shadow-sm border border-cream-border">
+                            <img src="{{ image.image_url }}" alt="{{ image.alt_text|default:product.product_name }}" class="w-full h-32 object-cover">
+                            {% if image.is_thumbnail %}
+                                <span class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">Thumbnail</span>
+                            {% endif %}
+                            <p class="text-xs text-warm-gray p-2 truncate">{{ image.alt_text|default:"No alt text" }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-warm-gray">No images available for this product.</p>
+            {% endif %}
+        </div>
+
+        {# Product Details Section #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Product Information</h3>
+            <div class="space-y-4 text-soft-brown light-text">
+                <p><strong>Description:</strong> {{ product.description|default:"N/A" }}</p>
+                <p><strong>Category:</strong> {{ product.category.category_name|default:"N/A" }}</p>
+                <p><strong>Brand:</strong> {{ product.brand.brand_name|default:"N/A" }}</p>
+                <p><strong>Gender:</strong> {{ product.get_gender_display|default:"N/A" }}</p>
+                <p><strong>Price:</strong> ${{ product.price|floatformat:2 }}</p>
+                <p><strong>Material:</strong> {{ product.material|default:"N/A" }}</p>
+                <p><strong>Care Instructions:</strong> {{ product.care_instructions|default:"N/A" }}</p>
+                <p><strong>Status:</strong>
+                    {% if product.is_active %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span>
+                    {% else %}
+                        <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full text-xs border border-yellow-200">Draft</span>
+                    {% endif %}
+                </p>
+                <p><strong>Created At:</strong> {{ product.created_at|date:"M d, Y H:i" }}</p>
+                <p><strong>Last Updated:</strong> {{ product.updated_at|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    {# Product Variants Section #}
+    <div class="mt-8 pt-8 border-t border-cream-border">
+        <h3 class="text-xl light-text text-accent-brown mb-4">Product Variants (Total Stock: {{ product.total_stock }})</h3>
+        {% if variants %}
+            <div class="bg-cream-light rounded-lg shadow-sm border border-cream-border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-cream-light border-b border-cream-border">
+                        <tr>
+                            <th class="text-left p-4 light-text text-soft-brown">Color</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Size</th>
+                            <th class="text-left p-4 light-text text-soft-brown">SKU</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for variant in variants %}
+                        <tr class="border-b border-cream-border hover:bg-cream-white">
+                            <td class="p-4 light-text text-soft-brown">{{ variant.color }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ variant.size }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ variant.sku }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ variant.quantity_in_stock }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-warm-gray mt-4">No variants available for this product.</p>
+        {% endif %}
+    </div>
+
+    {# Product Reviews Section (NEW) #}
+    <div class="mt-8 pt-8 border-t border-cream-border">
+        <h3 class="text-xl light-text text-accent-brown mb-4">Product Reviews</h3>
+        {% if reviews %}
+            <div class="bg-cream-light rounded-lg shadow-sm border border-cream-border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-cream-light border-b border-cream-border">
+                        <tr>
+                            <th class="text-left p-4 light-text text-soft-brown">Customer</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Rating</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Review Text</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Date</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Approved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in reviews %}
+                        <tr class="border-b border-cream-border hover:bg-cream-white">
+                            <td class="p-4 light-text text-soft-brown">{{ review.customer.email|default:"Anonymous" }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ review.rating }} stars</td>
+                            <td class="p-4 light-text text-soft-brown max-w-xs truncate">{{ review.review_text|default:"No text" }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ review.review_date|date:"M d, Y H:i" }}</td>
+                            <td class="p-4">
+                                {% if review.is_approved %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs light-text">Yes</span>
+                                {% else %}
+                                    <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full text-xs light-text border border-yellow-200">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-warm-gray mt-4">No reviews available for this product.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,155 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Edit Promotion: {{ promotion.promo_code }} - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Edit Promotion: <span class="text-accent-brown">{{ promotion.promo_code }}</span></h2>
+            <p class="light-text text-muted-blue">Update promotion details</p>
+        </div>
+        <a href="{% url 'promotion_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Promotions
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'promotion_edit' pk=promotion.pk %}">
+        {% csrf_token %}
+        
+        {% if general_error %}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="promo_code" class="block text-sm font-medium text-warm-gray mb-1">Promo Code</label>
+                <input type="text" id="promo_code" name="promo_code"
+                       value="{{ promotion_data.promo_code|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.promo_code %}border-red-500{% endif %}"
+                       placeholder="e.g., SUMMER20" required>
+                {% if errors.promo_code %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.promo_code }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="discount_type" class="block text-sm font-medium text-warm-gray mb-1">Discount Type</label>
+                <select id="discount_type" name="discount_type"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.discount_type %}border-red-500{% endif %}"
+                        required>
+                    <option value="">Select Type</option>
+                    {% for code, label in discount_type_choices %}
+                        <option value="{{ code }}" {% if code == promotion_data.discount_type %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.discount_type %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.discount_type }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="discount_value" class="block text-sm font-medium text-warm-gray mb-1">Discount Value</label>
+                <input type="number" step="0.01" id="discount_value" name="discount_value"
+                       value="{{ promotion_data.discount_value|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.discount_value %}border-red-500{% endif %}"
+                       placeholder="e.g., 20.00" required min="0.01">
+                {% if errors.discount_value %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.discount_value }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="min_order_amount" class="block text-sm font-medium text-warm-gray mb-1">Minimum Order Amount (Optional)</label>
+                <input type="number" step="0.01" id="min_order_amount" name="min_order_amount"
+                       value="{{ promotion_data.min_order_amount|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.min_order_amount %}border-red-500{% endif %}"
+                       placeholder="e.g., 50.00" min="0">
+                {% if errors.min_order_amount %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.min_order_amount }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-warm-gray mb-1">Start Date & Time</label>
+                <input type="datetime-local" id="start_date" name="start_date"
+                       value="{{ promotion_data.start_date|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.start_date %}border-red-500{% endif %}"
+                       required>
+                {% if errors.start_date %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.start_date }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-warm-gray mb-1">End Date & Time</label>
+                <input type="datetime-local" id="end_date" name="end_date"
+                       value="{{ promotion_data.end_date|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.end_date %}border-red-500{% endif %}"
+                       required>
+                {% if errors.end_date %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.end_date }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="usage_limit" class="block text-sm font-medium text-warm-gray mb-1">Usage Limit (Total, Optional)</label>
+                <input type="number" id="usage_limit" name="usage_limit"
+                       value="{{ promotion_data.usage_limit|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.usage_limit %}border-red-500{% endif %}"
+                       placeholder="e.g., 100" min="0">
+                {% if errors.usage_limit %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.usage_limit }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="per_customer_limit" class="block text-sm font-medium text-warm-gray mb-1">Per Customer Limit (Optional)</label>
+                <input type="number" id="per_customer_limit" name="per_customer_limit"
+                       value="{{ promotion_data.per_customer_limit|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.per_customer_limit %}border-red-500{% endif %}"
+                       placeholder="e.g., 1" min="0">
+                {% if errors.per_customer_limit %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.per_customer_limit }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-warm-gray mb-1">Description (Optional)</label>
+                <textarea id="description" name="description" rows="3"
+                          class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.description %}border-red-500{% endif %}"
+                          placeholder="Brief description of the promotion">{{ promotion_data.description|default_if_none:'' }}</textarea>
+                {% if errors.description %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.description }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2 flex items-center">
+                <input type="checkbox" id="is_active" name="is_active"
+                       class="form-checkbox h-5 w-5 text-accent-brown rounded"
+                       {% if promotion_data.is_active %}checked{% endif %}>
+                <label for="is_active" class="ml-2 text-sm font-medium text-warm-gray">Is Active?</label>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Update Promotion</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

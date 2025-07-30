@@ -1,0 +1,148 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Create New Order - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Create New Order</h2>
+            <p class="light-text text-muted-blue">Enter the main details for the new order</p>
+        </div>
+        <a href="{% url 'order_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Orders
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'order_create' %}">
+        {% csrf_token %}
+        
+        {% if general_error %}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="customer" class="block text-sm font-medium text-warm-gray mb-1">Customer</label>
+                <select id="customer" name="customer"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.customer %}border-red-500{% endif %}"
+                        required>
+                    <option value="">Select Customer</option>
+                    {% for customer in customers %}
+                        <option value="{{ customer.pk }}" {% if customer.pk|stringformat:"s" == order_data.customer_id|stringformat:"s" %}selected{% endif %}>
+                            {{ customer.first_name }} {{ customer.last_name }} ({{ customer.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.customer %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.customer }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="shipping_address" class="block text-sm font-medium text-warm-gray mb-1">Shipping Address (Optional)</label>
+                <select id="shipping_address" name="shipping_address"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.shipping_address %}border-red-500{% endif %}">
+                    <option value="">Select Shipping Address</option>
+                    {% for address in addresses %}
+                        <option value="{{ address.pk }}" {% if address.pk|stringformat:"s" == order_data.shipping_address_id|stringformat:"s" %}selected{% endif %}>
+                            {{ address.address_line1 }}, {{ address.city }} ({{ address.get_address_type_display }})
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.shipping_address %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.shipping_address }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="billing_address" class="block text-sm font-medium text-warm-gray mb-1">Billing Address (Optional)</label>
+                <select id="billing_address" name="billing_address"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.billing_address %}border-red-500{% endif %}">
+                    <option value="">Select Billing Address</option>
+                    {% for address in addresses %}
+                        <option value="{{ address.pk }}" {% if address.pk|stringformat:"s" == order_data.billing_address_id|stringformat:"s" %}selected{% endif %}>
+                            {{ address.address_line1 }}, {{ address.city }} ({{ address.get_address_type_display }})
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.billing_address %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.billing_address }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="order_status" class="block text-sm font-medium text-warm-gray mb-1">Order Status</label>
+                <select id="order_status" name="order_status"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.order_status %}border-red-500{% endif %}"
+                        required>
+                    {% for code, label in order_status_choices %}
+                        <option value="{{ code }}" {% if code == order_data.order_status %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.order_status %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.order_status }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="payment_status" class="block text-sm font-medium text-warm-gray mb-1">Payment Status</label>
+                <select id="payment_status" name="payment_status"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.payment_status %}border-red-500{% endif %}"
+                        required>
+                    {% for code, label in payment_status_choices %}
+                        <option value="{{ code }}" {% if code == order_data.payment_status %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.payment_status %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.payment_status }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="shipping_method" class="block text-sm font-medium text-warm-gray mb-1">Shipping Method (Optional)</label>
+                <input type="text" id="shipping_method" name="shipping_method"
+                       value="{{ order_data.shipping_method|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.shipping_method %}border-red-500{% endif %}"
+                       placeholder="e.g., Standard Shipping">
+                {% if errors.shipping_method %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.shipping_method }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="tracking_number" class="block text-sm font-medium text-warm-gray mb-1">Tracking Number (Optional)</label>
+                <input type="text" id="tracking_number" name="tracking_number"
+                       value="{{ order_data.tracking_number|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.tracking_number %}border-red-500{% endif %}"
+                       placeholder="e.g., TRK123456789">
+                {% if errors.tracking_number %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.tracking_number }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="reset" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Reset</button>
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Create Order</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

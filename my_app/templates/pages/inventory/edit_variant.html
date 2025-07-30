@@ -1,0 +1,118 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Edit Product Variant - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Edit Product Variant: <span class="text-accent-brown">{{ variant.sku }}</span></h2>
+            <p class="light-text text-muted-blue">Update details for this product variant</p>
+        </div>
+        <a href="{% url 'inventory_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Inventory
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'inventory_edit_variant' pk=variant.pk %}">
+        {% csrf_token %}
+
+        {% if general_error %}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="product" class="block text-sm font-medium text-warm-gray mb-1">Product</label>
+                <select id="product" name="product"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.product %}border-red-500{% endif %}"
+                        required>
+                    <option value="">Select Product</option>
+                    {% for product_option in products %}
+                        <option value="{{ product_option.pk }}" {% if product_option.pk|stringformat:"s" == variant_data.product_id|stringformat:"s" %}selected{% endif %}>
+                            {{ product_option.product_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.product %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.product }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="color" class="block text-sm font-medium text-warm-gray mb-1">Color</label>
+                <select id="color" name="color"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.color %}border-red-500{% endif %}"
+                        required>
+                    <option value="">Select Color</option>
+                    {% for color_option in color_options %}
+                        <option value="{{ color_option }}" {% if color_option == variant_data.color %}selected{% endif %}>
+                            {{ color_option }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.color %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.color }}</p>
+                {% endif %}
+            </div>
+
+            {# Single select for size in edit view, as each variant is for one size #}
+            <div>
+                <label for="size" class="block text-sm font-medium text-warm-gray mb-1">Size</label>
+                <select id="size" name="size"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.size %}border-red-500{% endif %}"
+                        required>
+                    <option value="">Select Size</option>
+                    {% for size_option in size_options %}
+                        <option value="{{ size_option }}" {% if size_option == variant_data.size %}selected{% endif %}>
+                            {{ size_option }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.size %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.size }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="sku" class="block text-sm font-medium text-warm-gray mb-1">SKU (Auto-generated)</label>
+                <input type="text" id="sku" name="sku"
+                       value="{{ variant_data.sku|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.sku %}border-red-500{% endif %}"
+                       placeholder="Auto-generated" readonly>
+                {% if errors.sku %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.sku }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="quantity_in_stock" class="block text-sm font-medium text-warm-gray mb-1">Quantity in Stock</label>
+                <input type="number" id="quantity_in_stock" name="quantity_in_stock"
+                       value="{{ variant_data.quantity_in_stock|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.quantity_in_stock %}border-red-500{% endif %}"
+                       placeholder="0" required min="0">
+                {% if errors.quantity_in_stock %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.quantity_in_stock }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Update Variant</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

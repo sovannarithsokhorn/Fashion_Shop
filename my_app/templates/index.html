@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Store Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'thin': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'cream-bg': '#faf8f5',
+                        'cream-light': '#f5f2ed',
+                        'cream-border': '#e8e3db',
+                        'warm-gray': '#8b8680',
+                        'soft-brown': '#a0958a',
+                        'accent-brown': '#7d6c5c',
+                        'cream-white': '#fefcf9',
+                        'warm-beige': '#f0ebe4',
+                        // Dark theme colors
+                        'dark-bg': '#1a1a1a',
+                        'dark-surface': '#2d2d2d',
+                        'dark-border': '#404040',
+                        'dark-text': '#e5e5e5',
+                        'dark-text-secondary': '#a3a3a3',
+                        'dark-accent': '#d4af37',
+                        'dark-hover': '#3a3a3a',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&family=Nunito:wght@200;300;400;500;600&display=swap"
+          rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Nunito', sans-serif;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .thin-text {
+            font-weight: 200;
+            letter-spacing: 0.5px;
+        }
+
+        .light-text {
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        .normal-text {
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+        .medium-text {
+            font-weight: 500;
+            letter-spacing: 0.1px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Dark theme styles */
+        .dark-theme {
+            background-color: #1a1a1a !important;
+        }
+
+        .dark-theme .bg-cream-bg {
+            background-color: #1a1a1a !important;
+        }
+
+        .dark-theme .bg-cream-white {
+            background-color: #2d2d2d !important;
+        }
+
+        .dark-theme .bg-cream-light {
+            background-color: #3a3a3a !important;
+        }
+
+        .dark-theme .bg-warm-beige {
+            background-color: #3a3a3a !important;
+        }
+
+        .dark-theme .border-cream-border {
+            border-color: #404040 !important;
+        }
+
+        .dark-theme .text-accent-brown {
+            color: #d4af37 !important;
+        }
+
+        .dark-theme .text-soft-brown {
+            color: #a3a3a3 !important;
+        }
+
+        .dark-theme .text-warm-gray {
+            color: #888 !important;
+        }
+
+        .dark-theme .text-gray-800 {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-theme .text-gray-700 {
+            color: #d1d1d1 !important;
+        }
+
+        .dark-theme .text-muted-blue {
+            color: #a3a3a3 !important;
+        }
+
+        .dark-theme .hover\:bg-warm-beige:hover {
+            background-color: #3a3a3a !important;
+        }
+
+        .dark-theme .hover\:text-accent-brown:hover {
+            color: #d4af37 !important;
+        }
+
+        .dark-theme .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .dark-theme input, .dark-theme select, .dark-theme textarea {
+            background-color: #3a3a3a !important;
+            border-color: #404040 !important;
+            color: #e5e5e5 !important;
+        }
+
+        .dark-theme input:focus, .dark-theme select:focus, .dark-theme textarea:focus {
+            border-color: #d4af37 !important;
+        }
+
+        .dark-theme .bg-gradient-to-br {
+            background: linear-gradient(135deg, #404040, #555) !important;
+        }
+
+        .dark-theme .bg-green-100 {
+            background-color: #1f4f3a !important;
+        }
+
+        .dark-theme .text-green-800 {
+            color: #4ade80 !important;
+        }
+
+        .dark-theme .bg-yellow-100 {
+            background-color: #4a3f1a !important;
+        }
+
+        .dark-theme .text-yellow-800 {
+            color: #fbbf24 !important;
+        }
+
+        .dark-theme .bg-blue-100 {
+            background-color: #1e3a5f !important;
+        }
+
+        .dark-theme .text-blue-800 {
+            color: #60a5fa !important;
+        }
+
+        .dark-theme .bg-gray-100 {
+            background-color: #404040 !important;
+        }
+
+        .dark-theme .text-gray-800 {
+            color: #d1d1d1 !important;
+        }
+
+        .dark-theme .bg-red-50 {
+            background-color: #4a1a1a !important;
+        }
+
+        .dark-theme .border-red-200 {
+            border-color: #7f1d1d !important;
+        }
+
+        .dark-theme .bg-yellow-50 {
+            background-color: #4a3f1a !important;
+        }
+
+        .dark-theme .border-yellow-200 {
+            border-color: #a16207 !important;
+        }
+
+        .dark-theme .text-red-600 {
+            color: #f87171 !important;
+        }
+
+        .dark-theme .text-yellow-600 {
+            color: #fbbf24 !important;
+        }
+
+        .dark-theme .text-accent-blue {
+            color: #60a5fa !important;
+        }
+
+        .dark-theme .text-green-500 {
+            color: #4ade80 !important;
+        }
+
+        .dark-theme .text-red-500 {
+            color: #f87171 !important;
+        }
+    </style>
+</head>
+<body class="bg-cream-bg min-h-screen">
+<!-- Sidebar -->
+    {% include "pages/leftsidebar.html" %}
+
+<!-- Main Content -->
+<div class="ml-64 p-8">
+     {% block content %}
+        {# This is where content from other templates will be inserted #}
+     {% endblock content %}
+</div>
+
+{# Remove all the hardcoded module divs from here #}
+{# The JavaScript showModule() will no longer be used for Django page navigation #}
+
+<script>
+    // Module switching functionality - RETAIN ONLY IF YOU HAVE JS-BASED MODULES ELSEWHERE
+    // For Django page navigation, this is no longer directly used by sidebar links
+    function showModule(moduleId) {
+        // This function would only be relevant if you have content loaded via AJAX
+        // or if you're still using it for other non-Django-navigated modules.
+        // If all navigation is via Django URLs, you can remove this function entirely.
+        const modules = document.querySelectorAll('.module');
+        modules.forEach(module => module.classList.add('hidden'));
+        const targetModule = document.getElementById(moduleId);
+        if (targetModule) {
+            targetModule.classList.remove('hidden');
+        }
+
+        // Update navigation active state (still useful for visual feedback)
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.classList.remove('bg-warm-beige', 'text-accent-brown');
+            item.classList.add('text-soft-brown');
+        });
+
+        // Add active state to clicked item (requires event.target, or pass element ID)
+        // This part needs refinement if showModule is called without an event.
+        // For direct Django URLs, you'd set active class based on current URL path.
+        // Example: if (window.location.pathname.includes(moduleId)) { // logic }
+    }
+
+    // Product management functions (these should be in product-specific JS or inline in product templates)
+    // REMOVE THESE FROM BASE.HTML - THEY ARE SPECIFIC TO PRODUCT MANAGEMENT
+    function showProductForm() { /* ... */ }
+    function closeProductForm() { /* ... */ }
+    function editProduct(sku) { /* ... */ }
+    function deleteProduct(sku) { /* ... */ }
+
+    // Order management functions (REMOVE FROM BASE.HTML)
+    function viewOrder(orderId) { /* ... */ }
+    function updateOrderStatus(orderId) { /* ... */ }
+
+    // Customer management functions (REMOVE FROM BASE.HTML)
+    function viewCustomer(email) { /* ... */ }
+    function editCustomer(email) { /* ... */ }
+
+    // Inventory management functions (REMOVE FROM BASE.HTML)
+    function adjustStock(sku) { /* ... */ }
+
+    // Category and brand management functions (REMOVE FROM BASE.HTML)
+    function showCategoryForm() { /* ... */ }
+    function showBrandForm() { /* ... */ }
+    function editCategory(id) { /* ... */ }
+    function deleteCategory(id) { /* ... */ }
+    function editBrand(id) { /* ... */ }
+    function deleteBrand(id) { /* ... */ }
+
+    // Promotion management functions (REMOVE FROM BASE.HTML)
+    function showPromotionForm() { /* ... */ }
+    function editPromotion(code) { /* ... */ }
+    function deactivatePromotion(code) { /* ... */ }
+    function viewPromotion(code) { /* ... */ }
+
+    // Review management functions (REMOVE FROM BASE.HTML)
+    function approveReview(reviewId) { /* ... */ }
+    function rejectReview(reviewId) { /* ... */ }
+    function viewReview(reviewId) { /* ... */ }
+    function hideReview(reviewId) { /* ... */ }
+
+
+    // Theme switching functionality (KEEP THIS IN BASE.HTML)
+    let isDarkMode = false;
+
+    function toggleTheme() {
+        isDarkMode = !isDarkMode;
+        const body = document.body;
+        const themeIcon = document.getElementById('theme-icon');
+
+        if (isDarkMode) {
+            body.classList.add('dark-theme');
+            themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.classList.remove('dark-theme');
+            themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // Initialize theme from localStorage (KEEP THIS IN BASE.HTML)
+    function initializeTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            isDarkMode = false; // Set to false so toggleTheme() will make it true
+            toggleTheme();
+        }
+    }
+
+    // Initialize dashboard (KEEP THIS IN BASE.HTML, but adjust if 'dashboard' is a full page load)
+    document.addEventListener('DOMContentLoaded', function () {
+        // If dashboard is a full page load, you might not need showModule('dashboard') here.
+        // Instead, the dashboard view would render its own template.
+        // If you intend for dashboard to be a JS-toggled module, then keep this.
+        // showModule('dashboard'); // This line is for JS-based module switching
+        initializeTheme();
+    });
+</script>
+<script>(function () {
+    function c() {
+        var b = a.contentDocument || a.contentWindow.document;
+        if (b) {
+            var d = b.createElement('script');
+            d.innerHTML = "window.__CF$cv$params={r:'966d9bab24e14992',t:'MTc1MzgwMjUwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName('head')[0].appendChild(d)
+        }
+    }
+
+    if (document.body) {
+        var a = document.createElement('iframe');
+        a.height = 1;
+        a.width = 1;
+        a.style.position = 'absolute';
+        a.style.top = 0;
+        a.style.left = 0;
+        a.style.border = 'none';
+        a.style.visibility = 'hidden';
+        document.body.appendChild(a);
+        if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else {
+            var e = document.onreadystatechange || function () {
+            };
+            document.onreadystatechange = function (b) {
+                e(b);
+                'loading' !== document.readyState && (document.onreadystatechange = e, c())
+            }
+        }
+    }
+})();</script>
+</body>
+</html>

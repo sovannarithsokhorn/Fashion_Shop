@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Edit Category: {{ category.category_name }} - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Edit Category: <span class="text-accent-brown">{{ category.category_name }}</span></h2>
+            <p class="light-text text-muted-blue">Update category details</p>
+        </div>
+        <a href="{% url 'category_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Categories
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'category_update' category_id=category.category_id %}">
+        {% csrf_token %} {# IMPORTANT: Always include for POST requests! #}
+        
+        {# Display general form errors if any #}
+        {% if general_error %}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 gap-6">
+            <div>
+                <label for="category_name" class="block text-sm font-medium text-warm-gray mb-1">Category Name</label>
+                <input type="text" id="category_name" name="category_name"
+                       value="{{ category_data.category_name|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.category_name %}border-red-500{% endif %}"
+                       placeholder="e.g., Dresses" required>
+                {% if errors.category_name %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.category_name }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Update Category</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

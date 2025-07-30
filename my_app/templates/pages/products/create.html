@@ -1,0 +1,165 @@
+{% extends 'index.html' %} {# Corrected: Extending index.html as requested #}
+{% load static %}
+
+{% block title %}Add New Product - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Add New Product</h2>
+            <p class="light-text text-muted-blue">Fill in the details to create a new product</p>
+        </div>
+        <a href="{% url 'product_index' %}"
+           class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+            Back to Products
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" action="{% url 'product_create' %}" enctype="multipart/form-data"> {# ADDED enctype #}
+        {% csrf_token %} {# IMPORTANT: Always include for POST requests! #}
+
+        {# Display general form errors if any - CORRECTED THIS LINE #}
+        {% if general_error %} {# Changed from errors.__all__ to general_error #}
+            <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="product_name" class="block text-sm font-medium text-warm-gray mb-1">Product Name</label>
+                <input type="text" id="product_name" name="product_name"
+                       value="{{ product_data.product_name|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.product_name %}border-red-500{% endif %}"
+                       placeholder="Enter product name" required>
+                {% if errors.product_name %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.product_name }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="price" class="block text-sm font-medium text-warm-gray mb-1">Price</label>
+                <input type="number" step="0.01" id="price" name="price"
+                       value="{{ product_data.price|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.price %}border-red-500{% endif %}"
+                       placeholder="0.00" required min="0.01">
+                {% if errors.price %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.price }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-warm-gray mb-1">Description</label>
+                <textarea id="description" name="description" rows="4"
+                          class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.description %}border-red-500{% endif %}"
+                          placeholder="Enter product description">{{ product_data.description|default_if_none:'' }}</textarea>
+                {% if errors.description %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.description }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="brand" class="block text-sm font-medium text-warm-gray mb-1">Brand</label>
+                <select id="brand" name="brand"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.brand %}border-red-500{% endif %}">
+                    <option value="">Select Brand</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.pk }}" {% if brand.pk|stringformat:"s" == product_data.brand_id|stringformat:"s" %}selected{% endif %}>
+                            {{ brand.brand_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.brand %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.brand }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="category" class="block text-sm font-medium text-warm-gray mb-1">Category</label>
+                <select id="category" name="category"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.category %}border-red-500{% endif %}">
+                    <option value="">Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.pk }}" {% if category.pk|stringformat:"s" == product_data.category_id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.category %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.category }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="gender" class="block text-sm font-medium text-warm-gray mb-1">Gender</label>
+                <select id="gender" name="gender"
+                        class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.gender %}border-red-500{% endif %}">
+                    <option value="">Select Gender</option>
+                    {% for code, label in gender_choices %}
+                        <option value="{{ code }}" {% if code == product_data.gender %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if errors.gender %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.gender }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="material" class="block text-sm font-medium text-warm-gray mb-1">Material</label>
+                <input type="text" id="material" name="material"
+                       value="{{ product_data.material|default_if_none:'' }}"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.material %}border-red-500{% endif %}"
+                       placeholder="e.g., 100% Cotton">
+                {% if errors.material %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.material }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="care_instructions" class="block text-sm font-medium text-warm-gray mb-1">Care Instructions</label>
+                <textarea id="care_instructions" name="care_instructions" rows="3"
+                          class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown {% if errors.care_instructions %}border-red-500{% endif %}"
+                          placeholder="e.g., Machine wash cold">{{ product_data.care_instructions|default_if_none:'' }}</textarea>
+                {% if errors.care_instructions %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.care_instructions }}</p>
+                {% endif %}
+            </div>
+
+            {# NEW: Product Image Upload Field #}
+            <div class="md:col-span-2">
+                <label for="product_image" class="block text-sm font-medium text-warm-gray mb-1">Product Image (Optional)</label>
+                <input type="file" id="product_image" name="product_image" accept="image/*"
+                       class="w-full border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
+                <p class="text-xs text-warm-gray mt-1">Upload a primary image for the product.</p>
+                {% if errors.product_image %}
+                    <p class="text-red-500 text-sm mt-1">{{ errors.product_image }}</p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2 flex items-center">
+                <input type="checkbox" id="is_active" name="is_active"
+                       class="form-checkbox h-5 w-5 text-accent-brown rounded"
+                       {% if product_data.is_active %}checked{% endif %}>
+                <label for="is_active" class="ml-2 text-sm font-medium text-warm-gray">Is Active?</label>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-8">
+            <button type="reset" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Reset</button>
+            <button type="submit" class="px-6 py-2 bg-accent-brown text-cream-white rounded-lg hover:bg-opacity-90 transition">Add Product</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

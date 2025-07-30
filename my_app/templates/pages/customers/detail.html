@@ -1,0 +1,191 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Customer Details: {{ customer.email }} - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center">
+            {# Profile Picture / Initials #}
+            {% if customer.profile_picture %}
+                <img src="{{ customer.profile_picture.url }}" alt="Profile Picture" class="w-20 h-20 rounded-full object-cover mr-4 border-2 border-accent-brown">
+            {% else %}
+                <div class="w-20 h-20 rounded-full bg-blue-200 flex items-center justify-center text-blue-800 text-3xl font-bold mr-4">
+                    {{ customer.first_name|first|upper }}{{ customer.last_name|first|upper }}
+                </div>
+            {% endif %}
+            <div>
+                <h2 class="text-3xl thin-text text-gray-800 mb-1">{{ customer.first_name }} {{ customer.last_name }}</h2>
+                <p class="light-text text-muted-blue">{{ customer.email }}</p>
+                <p class="text-sm light-text text-soft-brown mt-1">Member since {{ customer.registration_date|date:"Y-m-d" }}</p>
+                {% if is_premium_customer %}
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs light-text mt-2 inline-block">Premium Customer</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="space-x-3">
+            <a href="{% url 'customer_edit' pk=customer.pk %}"
+               class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+                Edit Profile
+            </a>
+            {# Placeholder for Send Message - consider integrating a messaging system later #}
+            <button class="bg-blue-600 text-white px-6 py-2 rounded-lg light-text hover:bg-blue-700 transition-colors duration-200">
+                Send Message
+            </button>
+            <a href="{% url 'customer_index' %}"
+               class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+                Back to Customers
+            </a>
+        </div>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Summary Cards #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-warm-beige rounded-lg p-4 shadow-sm border border-cream-border flex items-center justify-between">
+            <div>
+                <p class="text-sm text-warm-gray light-text">Total Orders</p>
+                <p class="text-2xl thin-text text-gray-800 mt-1">{{ total_orders }}</p>
+            </div>
+            <svg class="w-8 h-8 text-accent-brown opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+        </div>
+        <div class="bg-warm-beige rounded-lg p-4 shadow-sm border border-cream-border flex items-center justify-between">
+            <div>
+                <p class="text-sm text-warm-gray light-text">Total Spent</p>
+                <p class="text-2xl thin-text text-gray-800 mt-1">${{ total_spent|floatformat:2 }}</p>
+            </div>
+            <svg class="w-8 h-8 text-accent-brown opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+        </div>
+        <div class="bg-warm-beige rounded-lg p-4 shadow-sm border border-cream-border flex items-center justify-between">
+            <div>
+                <p class="text-sm text-warm-gray light-text">Average Order</p>
+                <p class="text-2xl thin-text text-gray-800 mt-1">${{ average_order|floatformat:2 }}</p>
+            </div>
+            <svg class="w-8 h-8 text-accent-brown opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+        </div>
+        <div class="bg-warm-beige rounded-lg p-4 shadow-sm border border-cream-border flex items-center justify-between">
+            <div>
+                <p class="text-sm text-warm-gray light-text">Last Order</p>
+                <p class="text-2xl thin-text text-gray-800 mt-1">{{ last_order|date:"Y-m-d"|default:"N/A" }}</p>
+            </div>
+            <svg class="w-8 h-8 text-accent-brown opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {# Contact Information Section #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Contact Information</h3>
+            <div class="space-y-3 text-soft-brown light-text">
+                <p><strong>Phone:</strong> {{ customer.phone_number|default:"N/A" }}</p>
+                {# Displaying default shipping/billing address or first available #}
+                {% with default_address=addresses|first %} {# Simple way to get first address #}
+                    {% if default_address %}
+                        <p class="mt-2"><strong>Address:</strong></p>
+                        <p>{{ default_address.address_line1 }}</p>
+                        {% if default_address.address_line2 %}<p>{{ default_address.address_line2 }}</p>{% endif %}
+                        <p>{{ default_address.city }}, {{ default_address.state_province|default:"" }} {{ default_address.postal_code }}</p>
+                        <p>{{ default_address.country }}</p>
+                    {% else %}
+                        <p>No primary address available.</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        {# Preferences Section #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Preferences</h3>
+            <div class="space-y-3 text-soft-brown light-text">
+                {# Placeholder for shopping preferences. Replace with actual data if available in model. #}
+                <p><strong>Shopping Preferences:</strong> {{ shopping_preferences|default:"N/A" }}</p>
+                {# Add more preferences here if your model supports them #}
+            </div>
+        </div>
+
+        {# Notes Section #}
+        <div class="lg:col-span-2">
+            <h3 class="text-xl light-text text-accent-brown mb-4">Notes</h3>
+            <div class="bg-cream-light rounded-lg p-4 shadow-sm border border-cream-border text-soft-brown light-text">
+                <p>{{ customer.notes|default:"No internal notes for this customer." }}</p>
+                <a href="{% url 'customer_edit' pk=customer.pk %}" class="text-accent-brown hover:text-opacity-70 text-sm mt-2 inline-block">Edit Notes</a>
+            </div>
+        </div>
+    </div>
+
+    {# Order History Section #}
+    <div class="mt-8 pt-8 border-t border-cream-border">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl light-text text-accent-brown">Order History</h3>
+            <button class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm light-text hover:bg-gray-700 transition-colors duration-200">
+                Export Orders
+            </button>
+        </div>
+
+        {% if orders %}
+            <div class="bg-cream-light rounded-lg shadow-sm border border-cream-border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-cream-light border-b border-cream-border">
+                        <tr>
+                            <th class="text-left p-4 light-text text-soft-brown">Order ID</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Date</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Items</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Total</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Status</th>
+                            <th class="text-left p-4 light-text text-soft-brown">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="border-b border-cream-border hover:bg-cream-white">
+                            <td class="p-4 light-text text-accent-brown">#{{ order.order_id }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ order.order_date|date:"Y-m-d" }}</td>
+                            <td class="p-4 light-text text-soft-brown">{{ order.items.count }} items</td>
+                            <td class="p-4 light-text text-soft-brown">${{ order.total_amount|floatformat:2 }}</td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 rounded-full text-xs light-text
+                                    {% if order.order_status == 'DELIVERED' %}bg-green-100 text-green-800
+                                    {% elif order.order_status == 'SHIPPED' %}bg-blue-100 text-blue-800
+                                    {% elif order.order_status == 'CANCELLED' %}bg-red-50 text-red-600 border border-red-200
+                                    {% else %}bg-yellow-50 text-yellow-600 border border-yellow-200{% endif %}">
+                                    {{ order.order_status }}
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <a href="{% url 'order_edit' pk=order.pk %}" class="text-accent-brown hover:text-opacity-70">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-warm-gray light-text">No orders found for this customer.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-warm-gray mt-4">No orders found for this customer.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,63 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Category List - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Category Management</h2>
+            <p class="light-text text-muted-blue">Organize your products into categories</p>
+        </div>
+        {# Button to navigate to the category creation page #}
+        <a href="{% url 'category_create' %}"
+           class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+            Add Category
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Categories Table #}
+    <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-cream-light border-b border-cream-border">
+                <tr>
+                    <th class="text-left p-4 light-text text-soft-brown">Category Name</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr class="border-b border-cream-border hover:bg-cream-light">
+                    <td class="p-4 light-text text-accent-brown">{{ category.category_name }}</td>
+                    <td class="p-4">
+                        <a href="{% url 'category_edit' category_id=category.category_id %}" class="text-accent-brown hover:text-opacity-70 mr-3">Edit</a>
+                        {# Delete button as a form for POST request, as per your views #}
+                        <form action="{% url 'category_delete' category_id=category.category_id %}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete category {{ category.category_name }}?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="_method" value="DELETE"> {# For Django to recognize as DELETE #}
+                            <button type="submit" class="text-red-500 hover:text-red-600">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="p-4 text-center text-warm-gray light-text">No categories found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

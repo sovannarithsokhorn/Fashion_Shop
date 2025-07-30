@@ -1,0 +1,46 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Review Details - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl thin-text text-gray-800 mb-2">Review Details</h2>
+            <p class="light-text text-muted-blue">Detailed view of the product review</p>
+        </div>
+        <div class="space-x-3">
+            <a href="{% url 'review_edit' pk=review.pk %}"
+               class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+                Edit Review
+            </a>
+            <a href="{% url 'review_index' %}"
+               class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+                Back to Reviews
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        {# Review Information #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Review Information</h3>
+            <div class="space-y-3 text-soft-brown light-text">
+                <p><strong>Product:</strong> {{ review.product.product_name|default:"N/A" }}</p>
+                <p><strong>Customer:</strong> {{ review.customer.email|default:"Anonymous" }}</p>
+                <p><strong>Rating:</strong> {{ review.rating }} stars</p>
+                <p><strong>Review Text:</strong> {{ review.review_text|default:"No review text provided." }}</p>
+                <p><strong>Review Date:</strong> {{ review.review_date|date:"M d, Y H:i" }}</p>
+                <p><strong>Approved:</strong>
+                    {% if review.is_approved %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Yes</span>
+                    {% else %}
+                        <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full text-xs border border-yellow-200">No</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

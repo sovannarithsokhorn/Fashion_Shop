@@ -1,0 +1,90 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Inventory - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Inventory Management</h2>
+            <p class="light-text text-muted-blue">Manage your product stock levels</p>
+        </div>
+        {# Button to navigate to the product variant creation page #}
+        <a href="{% url 'inventory_create_variant' %}"
+           class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+            Add New Variant
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Inventory Table #}
+    <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-cream-light border-b border-cream-border">
+                <tr>
+                    <th class="text-left p-4 light-text text-soft-brown">Product Name</th>
+                    <th class="text-left p-4 light-text text-soft-brown">SKU</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Color</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Size</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Category</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Brand</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Stock Quantity</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Status</th>
+                    <th class="text-left p-4 light-text text-soft-brown">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for variant in variants %}
+                <tr class="border-b border-cream-border hover:bg-cream-light">
+                    <td class="p-4">
+                        <p class="light-text text-accent-brown">{{ variant.product.product_name }}</p>
+                    </td>
+                    <td class="p-4 light-text text-soft-brown">{{ variant.sku }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ variant.color }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ variant.size }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ variant.product.category.category_name|default:"N/A" }}</td>
+                    <td class="p-4 light-text text-soft-brown">{{ variant.product.brand.brand_name|default:"N/A" }}</td>
+                    <td class="p-4 light-text text-soft-brown">
+                        {% if variant.quantity_in_stock <= low_stock_threshold %}
+                            <span class="text-red-500 font-medium">{{ variant.quantity_in_stock }} (Low Stock!)</span>
+                        {% else %}
+                            {{ variant.quantity_in_stock }}
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        {% if variant.product.is_active %}
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs light-text">Active</span>
+                        {% else %}
+                            <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full text-xs light-text border border-yellow-200">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        <a href="{% url 'inventory_edit_variant' pk=variant.pk %}" class="text-accent-brown hover:text-opacity-70 mr-3">Edit</a>
+                        {# Delete button as a form for POST request #}
+                        <form action="{% url 'inventory_delete_variant' pk=variant.pk %}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete variant {{ variant.sku }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-500 hover:text-red-600">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="p-4 text-center text-warm-gray light-text">No product variants found in inventory.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

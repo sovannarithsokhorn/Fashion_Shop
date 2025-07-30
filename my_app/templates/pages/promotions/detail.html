@@ -1,0 +1,74 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Promotion Details: {{ promotion.promo_code }} - Fashion Admin{% endblock %}
+
+{% block content %}
+<div class="module bg-cream-white rounded-lg shadow-sm border border-cream-border p-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl thin-text text-gray-800 mb-2">Promotion: <span class="text-accent-brown">{{ promotion.promo_code }}</span></h2>
+            <p class="light-text text-muted-blue">Detailed view of the promotion</p>
+        </div>
+        <div class="space-x-3">
+            <a href="{% url 'promotion_edit' pk=promotion.pk %}"
+               class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200">
+                Edit Promotion
+            </a>
+            <a href="{% url 'promotion_index' %}"
+               class="bg-gray-600 text-white px-6 py-2 rounded-lg light-text hover:bg-gray-700 transition-colors duration-200">
+                Back to Promotions
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        {# Promotion Details #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Promotion Information</h3>
+            <div class="space-y-3 text-soft-brown light-text">
+                <p><strong>Promo Code:</strong> {{ promotion.promo_code }}</p>
+                <p><strong>Description:</strong> {{ promotion.description|default:"N/A" }}</p>
+                <p><strong>Discount Type:</strong> {{ promotion.get_discount_type_display }}</p>
+                <p><strong>Discount Value:</strong> 
+                    {% if promotion.discount_type == 'PERCENTAGE' %}
+                        {{ promotion.discount_value|floatformat:0 }}%
+                    {% elif promotion.discount_type == 'FIXED_AMOUNT' %}
+                        ${{ promotion.discount_value|floatformat:2 }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+                <p><strong>Minimum Order Amount:</strong> ${{ promotion.min_order_amount|floatformat:2|default:"0.00" }}</p>
+                <p><strong>Usage Limit (Total):</strong> {{ promotion.usage_limit|default:"Unlimited" }}</p>
+                <p><strong>Per Customer Limit:</strong> {{ promotion.per_customer_limit|default:"Unlimited" }}</p>
+                <p><strong>Status:</strong>
+                    {% if promotion.is_active %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span>
+                    {% else %}
+                        <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full text-xs border border-yellow-200">Inactive</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {# Dates and Times #}
+        <div>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Dates and Times</h3>
+            <div class="space-y-3 text-soft-brown light-text">
+                <p><strong>Start Date:</strong> {{ promotion.start_date|date:"M d, Y H:i" }}</p>
+                <p><strong>End Date:</strong> {{ promotion.end_date|date:"M d, Y H:i" }}</p>
+                <p><strong>Days Remaining:</strong>
+                    {% if promotion.end_date %}
+                        {% with days_left=promotion.end_date|timeuntil %}
+                            {{ days_left }}
+                        {% endwith %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
