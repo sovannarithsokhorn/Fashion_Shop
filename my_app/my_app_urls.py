@@ -6,6 +6,15 @@ from .templates.Views import categories_views, products_views, dashboard_views, 
     brands_views, orders_views, customers_views, promotions_views, reviews_views  # Corrected import path
 
 urlpatterns = [
+    # Auth URLs (NEW)
+    path("login/", views.login_view, name='login'),
+    path("register/", views.register_view, name='register'),
+    path("logout/", views.logout_view, name='logout'),
+    # Placeholder for password reset (Django's built-in password reset is more complex)
+    path("password_reset/", views.login_view, name='password_reset'),
+    path("profile/", views.user_detail_view, name='user_detail'),
+
+
     path("", views.home, name='home'),
     path('dashboard/', dashboard_views.dashboard, name='dashboard'),
 

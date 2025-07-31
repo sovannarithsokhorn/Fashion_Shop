@@ -10,131 +10,167 @@
             <h2 class="text-2xl thin-text text-gray-800 mb-2">Dashboard Overview</h2>
             <p class="light-text text-muted-blue">Welcome to your Fashion Store Admin Panel</p>
         </div>
-
     </div>
 
-    {# Dashboard Cards/Sections #}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-        {# Sales Summary Card #}
-        <div class="border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Sales Summary</h3>
-            <p class="text-3xl font-bold text-accent-brown">${{ total_sales_last_30_days|floatformat:2 }}</p>
-            <p class="text-sm text-warm-gray mt-2">Total Sales (Last 30 Days)</p>
-            <div class="mt-4 flex items-center text-green-600 text-sm">
-                {% if sales_percentage_change >= 0 %}
-                    <svg class="w-4 h-4 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
-                    <span class="text-green-600">+{{ sales_percentage_change|floatformat:0 }}% from last month</span>
-                {% else %}
-                    <svg class="w-4 h-4 mr-1 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
-                    </svg>
-                    <span class="text-red-600">{{ sales_percentage_change|floatformat:0 }}% from last month</span>
+    {# Django Messages Display - Keep for errors/warnings, SweetAlert handles success #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                {# Only display non-success messages here, as SweetAlert handles success #}
+                {% if not 'success' in message.tags %}
+                    <li class="p-3 mb-2 rounded-lg text-sm {% if 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ message }}
+                    </li>
                 {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {# Sales Summary Card #}
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 flex flex-col justify-between">
+            <div>
+                <p class="text-sm light-text text-warm-gray mb-2">Sales Summary</p>
+                <h3 class="text-3xl font-semibold text-accent-brown mb-1">${{ total_sales_last_30_days|floatformat:2 }}</h3>
+                <p class="text-sm text-soft-brown">Total Sales (Last 30 Days)</p>
+            </div>
+            <div class="mt-4 flex items-center text-sm">
+                {% if sales_percentage_change >= 0 %}
+                    <span class="text-green-500 flex items-center mr-2">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +{{ sales_percentage_change|floatformat:2 }}%
+                    </span>
+                {% else %}
+                    <span class="text-red-500 flex items-center mr-2">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        {{ sales_percentage_change|floatformat:2 }}%
+                    </span>
+                {% endif %}
+                <span class="text-warm-gray">from last month</span>
             </div>
         </div>
 
         {# Orders Overview Card #}
-        <div class="border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Orders Overview</h3>
-            <p class="text-3xl font-bold text-accent-brown">{{ new_orders_today }}</p>
-            <p class="text-sm text-warm-gray mt-2">New Orders (Today)</p>
-            <div class="mt-4 flex items-center text-blue-600 text-sm">
-                <svg class="w-4 h-4 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                </svg>
-                <span>{{ pending_orders }} Pending, {{ shipped_orders }} Shipped</span>
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 flex flex-col justify-between">
+            <div>
+                <p class="text-sm light-text text-warm-gray mb-2">Orders Overview</p>
+                <h3 class="text-3xl font-semibold text-accent-brown mb-1">{{ new_orders_today }}</h3>
+                <p class="text-sm text-soft-brown">New Orders (Today)</p>
+            </div>
+            <div class="mt-4 text-sm text-warm-gray">
+                <p>{{ pending_orders }} Pending</p>
+                <p>{{ shipped_orders }} Shipped</p>
             </div>
         </div>
 
-        {# Product Stock Alert Card #}
-        <div class="border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Stock Alerts</h3>
-            <p class="text-3xl font-bold text-red-500">{{ low_stock_products_count }}</p>
-            <p class="text-sm text-warm-gray mt-2">Products Low in Stock</p>
-            <div class="mt-4 flex items-center text-red-500 text-sm">
-                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <span>Action Required!</span>
+        {# Stock Alerts Card #}
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 flex flex-col justify-between">
+            <div>
+                <p class="text-sm light-text text-warm-gray mb-2">Stock Alerts</p>
+                <h3 class="text-3xl font-semibold text-red-500 mb-1">{{ low_stock_products_count }}</h3>
+                <p class="text-sm text-soft-brown">Products Low in Stock</p>
+            </div>
+            <div class="mt-4 text-sm">
+                <a href="{% url 'inventory_index' %}" class="text-accent-brown hover:underline flex items-center">
+                    <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Action Required!
+                </a>
             </div>
         </div>
 
-        {# Total Products Card (New) #}
-        <div class="border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Total Products</h3>
-            <p class="text-3xl font-bold text-accent-brown">{{ total_products_count }}</p>
-            <p class="text-sm text-warm-gray mt-2">Total Products in Store</p>
-            <div class="mt-4 flex items-center text-blue-600 text-sm">
-                <svg class="w-4 h-4 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <span>All listed products</span>
+        {# Total Products Card #}
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 flex flex-col justify-between">
+            <div>
+                <p class="text-sm light-text text-warm-gray mb-2">Total Products</p>
+                <h3 class="text-3xl font-semibold text-accent-brown mb-1">{{ total_products_count }}</h3>
+                <p class="text-sm text-soft-brown">Total Products in Store</p>
+            </div>
+            <div class="mt-4 text-sm">
+                <a href="{% url 'product_index' %}" class="text-accent-brown hover:underline flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    All listed products
+                </a>
             </div>
         </div>
 
-        {# Total Categories Card (New) #}
-        <div class="border border-cream-border rounded-lg px-4 py-2 light-text bg-cream-light focus:outline-none focus:border-accent-brown">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Total Categories</h3>
-            <p class="text-3xl font-bold text-accent-brown">{{ total_categories_count }}</p>
-            <p class="text-sm text-warm-gray mt-2">Total Product Categories</p>
-            <div class="mt-4 flex items-center text-purple-600 text-sm">
-                <svg class="w-4 h-4 mr-1 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                <span>Organize your products</span>
+        {# Total Categories Card #}
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 flex flex-col justify-between">
+            <div>
+                <p class="text-sm light-text text-warm-gray mb-2">Total Categories</p>
+                <h3 class="text-3xl font-semibold text-accent-brown mb-1">{{ total_categories_count }}</h3>
+                <p class="text-sm text-soft-brown">Total Product Categories</p>
+            </div>
+            <div class="mt-4 text-sm">
+                <a href="{% url 'category_index' %}" class="text-accent-brown hover:underline flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    Organize your products
+                </a>
             </div>
         </div>
     </div>
 
-    {# Recent Activity / Quick Links Section #}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {# Recent Activity Table/List #}
+        {# Recent Activity Section #}
         <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-            <ul class="divide-y divide-cream-border">
+            <h3 class="text-xl light-text text-accent-brown mb-4">Recent Activity</h3>
+            <ul class="space-y-4">
                 {% for activity in recent_activities %}
-                <li class="py-3 flex justify-between items-center text-gray-700">
-                    <span>{{ activity.description }}</span>
-                    <span class="text-xs text-warm-gray">{{ activity.date|timesince }} ago</span>
-                </li>
+                    <li class="flex items-start">
+                        <div class="w-2 h-2 rounded-full bg-soft-brown mt-2 mr-3"></div>
+                        <div>
+                            <p class="light-text text-gray-800">{{ activity.description }}</p>
+                            <p class="text-xs text-warm-gray">{{ activity.date|timesince }} ago</p>
+                        </div>
+                    </li>
                 {% empty %}
-                <li class="py-3 text-gray-700">No recent activity.</li>
+                    <p class="text-warm-gray">No recent activity.</p>
                 {% endfor %}
             </ul>
         </div>
 
-        {# Quick Links / Shortcuts #}
+        {# Quick Links Section #}
         <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
+            <h3 class="text-xl light-text text-accent-brown mb-4">Quick Links</h3>
             <div class="grid grid-cols-2 gap-4">
-                <a href="{% url 'product_show' %}" class="flex flex-col items-center justify-center p-4 rounded-lg bg-warm-beige hover:bg-cream-border transition-colors duration-200">
-                    <svg class="w-6 h-6 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0 0H6"/>
-                    </svg>
-                    <span class="text-sm light-text text-soft-brown">Add Product</span>
+                <a href="{% url 'product_show' %}" class="flex flex-col items-center justify-center p-4 bg-cream-light rounded-lg hover:bg-cream-border transition-colors duration-200">
+                    <svg class="w-8 h-8 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    <span class="text-soft-brown light-text">Add Product</span>
                 </a>
-                <a href="{% url 'category_index' %}" class="flex flex-col items-center justify-center p-4 rounded-lg bg-warm-beige hover:bg-cream-border transition-colors duration-200">
-                    <svg class="w-6 h-6 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                    </svg>
-                    <span class="text-sm light-text text-soft-brown">View Categories</span>
+                <a href="{% url 'category_index' %}" class="flex flex-col items-center justify-center p-4 bg-cream-light rounded-lg hover:bg-cream-border transition-colors duration-200">
+                    <svg class="w-8 h-8 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    <span class="text-soft-brown light-text">View Categories</span>
                 </a>
-                <a href="#" class="flex flex-col items-center justify-center p-4 rounded-lg bg-warm-beige hover:bg-cream-border transition-colors duration-200">
-                    <svg class="w-6 h-6 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2"/>
-                    </svg>
-                    <span class="text-sm light-text text-soft-brown">Manage Orders</span>
+                <a href="{% url 'order_index' %}" class="flex flex-col items-center justify-center p-4 bg-cream-light rounded-lg hover:bg-cream-border transition-colors duration-200">
+                    <svg class="w-8 h-8 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    <span class="text-soft-brown light-text">Manage Orders</span>
                 </a>
-                <a href="#" class="flex flex-col items-center justify-center p-4 rounded-lg bg-warm-beige hover:bg-cream-border transition-colors duration-200">
-                    <svg class="w-6 h-6 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                    </svg>
-                    <span class="text-sm light-text text-soft-brown">View Customers</span>
+                <a href="{% url 'customer_index' %}" class="flex flex-col items-center justify-center p-4 bg-cream-light rounded-lg hover:bg-cream-border transition-colors duration-200">
+                    <svg class="w-8 h-8 text-accent-brown mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+                    <span class="text-soft-brown light-text">View Customers</span>
                 </a>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve SweetAlert flags from Django context
+        const loginSuccess = "{{ login_success|default:'false' }}";
+        const loggedInUsername = "{{ logged_in_username|default:'' }}";
+
+        if (loginSuccess === 'True' && loggedInUsername) { // Note: Django's boolean 'True' is a string in template
+            Swal.fire({
+                title: `Welcome back, ${loggedInUsername}!`,
+                text: 'You have successfully logged in to Fashion Admin.',
+                icon: 'success',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                position: 'center' // Ensure it's centered
+            });
+        }
+    });
+</script>
 {% endblock content %}

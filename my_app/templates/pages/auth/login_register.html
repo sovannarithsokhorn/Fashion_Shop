@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Store Admin - Login/Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {# SweetAlert2 CDN #}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'thin': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'cream-bg': '#faf8f5',
+                        'cream-light': '#f5f2ed',
+                        'cream-border': '#e8e3db',
+                        'warm-gray': '#8b8680',
+                        'soft-brown': '#a0958a',
+                        'accent-brown': '#7d6c5c',
+                        'cream-white': '#fefcf9',
+                        'warm-beige': '#f0ebe4',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Poppins', 'Nunito', sans-serif; 
+            font-weight: 300; 
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+        }
+        .thin-text { font-weight: 200; letter-spacing: 0.5px; }
+        .light-text { font-weight: 300; letter-spacing: 0.3px; }
+        .normal-text { font-weight: 400; letter-spacing: 0.2px; }
+        .medium-text { font-weight: 500; letter-spacing: 0.1px; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
+
+        .form-container {
+            backdrop-filter: blur(10px);
+            background: rgba(254, 252, 249, 0.95);
+        }
+
+        .input-focus:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(125, 108, 92, 0.15);
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(125, 108, 92, 0.25);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .background-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(125, 108, 92, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(160, 149, 138, 0.1) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-cream-bg min-h-screen background-pattern">
+    <!-- Background Decorative Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-accent-brown to-soft-brown opacity-10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-warm-beige to-cream-light opacity-20 rounded-full blur-2xl"></div>
+        <div class="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-soft-brown to-warm-gray opacity-15 rounded-full blur-lg"></div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="w-full max-w-md">
+            <!-- Logo/Brand Section -->
+            <div class="text-center mb-8 fade-in">
+                <div class="w-16 h-16 bg-gradient-to-br from-accent-brown to-soft-brown rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <svg class="w-8 h-8 text-cream-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl thin-text text-accent-brown mb-2">Fashion Admin</h1>
+                <p class="light-text text-warm-gray">Welcome back to your dashboard</p>
+            </div>
+
+            {# Django Messages Display - These will now be hidden if SweetAlert is used for success #}
+            {% if messages %}
+                <ul class="messages mb-6">
+                    {% for message in messages %}
+                        <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <!-- Login Form -->
+            <div id="loginForm" class="form-container rounded-2xl shadow-xl border border-cream-border p-8 {% if form_type == 'login' or not form_type %}fade-in{% else %}hidden{% endif %}">
+                <div class="mb-6">
+                    <h2 class="text-2xl light-text text-accent-brown mb-2">Sign In</h2>
+                    <p class="light-text text-soft-brown">Access your admin dashboard</p>
+                </div>
+
+                <form method="POST" action="{% url 'login' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label for="login_username" class="block text-sm light-text text-soft-brown mb-2">Username</label> {# UPDATED LABEL #}
+                        <input 
+                            type="text" 
+                            id="login_username"
+                            name="username" 
+                            required
+                            class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                            placeholder="yourusername" {# UPDATED PLACEHOLDER #}
+                            value="{{ request.POST.username|default:'' }}" 
+                        >
+                    </div>
+
+                    <div>
+                        <label for="login_password" class="block text-sm light-text text-soft-brown mb-2">Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="login_password"
+                                name="password"
+                                required
+                                class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                                placeholder="Enter your password"
+                            >
+                            <button 
+                                type="button" 
+                                onclick="togglePassword('login_password')"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-warm-gray hover:text-soft-brown"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember_me" class="rounded border-cream-border text-accent-brown focus:ring-accent-brown">
+                            <span class="ml-2 text-sm light-text text-soft-brown">Remember me</span>
+                        </label>
+                        <button type="button" onclick="showForgotPassword()" class="text-sm text-accent-brown hover:text-opacity-70 light-text">
+                            Forgot password?
+                        </button>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-accent-brown text-cream-white py-3 rounded-lg light-text btn-hover transition-all duration-200 shadow-md"
+                    >
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="light-text text-soft-brown">
+                        Don't have an account? 
+                        <button onclick="showRegisterForm()" class="text-accent-brown hover:text-opacity-70 light-text ml-1">
+                            Create one
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="form-container rounded-2xl shadow-xl border border-cream-border p-8 {% if form_type == 'register' %}fade-in{% else %}hidden{% endif %}">
+                <div class="mb-6">
+                    <h2 class="text-2xl light-text text-accent-brown mb-2">Create Account</h2>
+                    <p class="light-text text-soft-brown">Join our fashion admin platform</p>
+                </div>
+
+                <form method="POST" action="{% url 'register' %}" class="space-y-6">
+                    {% csrf_token %}
+                    {# Removed First Name and Last Name fields #}
+                    {# Removed Company/Store Name block #}
+
+                    <div>
+                        <label for="register_username" class="block text-sm light-text text-soft-brown mb-2">Username</label>
+                        <input 
+                            type="text" 
+                            id="register_username"
+                            name="username"
+                            required
+                            class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                            placeholder="Choose a username"
+                            value="{{ request.POST.username|default:'' }}"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="register_email" class="block text-sm light-text text-soft-brown mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="register_email"
+                            name="email"
+                            required
+                            class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                            placeholder="your@email.com"
+                            value="{{ request.POST.email|default:'' }}"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="register_password" class="block text-sm light-text text-soft-brown mb-2">Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="register_password"
+                                name="password"
+                                required
+                                minlength="8"
+                                class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                                placeholder="Create a strong password"
+                            >
+                            <button 
+                                type="button" 
+                                onclick="togglePassword('register_password')"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-warm-gray hover:text-soft-brown"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-warm-gray mt-1">Password must be at least 8 characters long</p>
+                    </div>
+
+                    <div>
+                        <label for="confirm_password" class="block text-sm light-text text-soft-brown mb-2">Confirm Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="confirm_password"
+                                name="confirm_password"
+                                required
+                                class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                                placeholder="Confirm your password"
+                            >
+                            <button 
+                                type="button" 
+                                onclick="togglePassword('confirm_password')"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-warm-gray hover:text-soft-brown"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="flex items-start">
+                            <input type="checkbox" name="agree_terms" required class="rounded border-cream-border text-accent-brown focus:ring-accent-brown mt-1">
+                            <span class="ml-2 text-sm light-text text-soft-brown">
+                                I agree to the 
+                                <button type="button" onclick="showTerms()" class="text-accent-brown hover:text-opacity-70">Terms of Service</button> 
+                                and 
+                                <button type="button" onclick="showPrivacy()" class="text-accent-brown hover:text-opacity-70">Privacy Policy</button>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-accent-brown text-cream-white py-3 rounded-lg light-text btn-hover transition-all duration-200 shadow-md"
+                    >
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="light-text text-soft-brown">
+                        Already have an account? 
+                        <button onclick="showLoginForm()" class="text-accent-brown hover:text-opacity-70 light-text ml-1">
+                            Sign in
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form (Placeholder for future implementation) -->
+            <div id="forgotPasswordForm" class="form-container rounded-2xl shadow-xl border border-cream-border p-8 {% if form_type == 'forgot_password' %}fade-in{% else %}hidden{% endif %}">
+                <div class="mb-6">
+                    <h2 class="text-2xl light-text text-accent-brown mb-2">Reset Password</h2>
+                    <p class="light-text text-soft-brown">Enter your email to receive reset instructions</p>
+                </div>
+
+                <form method="POST" action="{% url 'password_reset' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label for="reset_email" class="block text-sm light-text text-soft-brown mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="reset_email"
+                            name="email"
+                            required
+                            class="w-full border border-cream-border rounded-lg px-4 py-3 light-text bg-cream-white focus:outline-none focus:border-accent-brown input-focus transition-all duration-200" 
+                            placeholder="Enter your email address"
+                            value="{{ request.POST.email|default:'' }}"
+                        >
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-accent-brown text-cream-white py-3 rounded-lg light-text btn-hover transition-all duration-200 shadow-md"
+                    >
+                        Send Reset Link
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <button onclick="showLoginForm()" class="text-accent-brown hover:text-opacity-70 light-text">
+                        ← Back to Sign In
+                    </button>
+                </div>
+            </div>
+
+            {# No dedicated success message div, Django messages will handle feedback #}
+        </div>
+    </div>
+
+    <script>
+        // Form switching functions
+        function showLoginForm() {
+            hideAllForms();
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('slide-in');
+        }
+
+        function showRegisterForm() {
+            hideAllForms();
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('slide-in');
+        }
+
+        function showForgotPassword() {
+            hideAllForms();
+            document.getElementById('forgotPasswordForm').classList.remove('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('slide-in');
+        }
+
+        function hideAllForms() {
+            const forms = ['loginForm', 'registerForm', 'forgotPasswordForm']; 
+            forms.forEach(formId => {
+                const form = document.getElementById(formId);
+                form.classList.add('hidden');
+                form.classList.remove('slide-in');
+            });
+        }
+
+        // Password visibility toggle
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+
+        // Placeholder for terms/privacy
+        function showTerms() {
+            Swal.fire({
+                title: 'Terms of Service',
+                text: 'These are the terms of service for Fashion Admin. By using this platform, you agree to abide by all rules and regulations. This is a placeholder for actual terms.',
+                icon: 'info',
+                confirmButtonText: 'Got it'
+            });
+        }
+
+        function showPrivacy() {
+            Swal.fire({
+                title: 'Privacy Policy',
+                text: 'This is the privacy policy for Fashion Admin. We value your privacy and protect your data. This is a placeholder for an actual privacy policy.',
+                icon: 'info',
+                confirmButtonText: 'Got it'
+            });
+        }
+
+        // Input validation and enhancement (client-side visual feedback)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add real-time password strength indicator (visual only)
+            const passwordInputs = document.querySelectorAll('input[type="password"]');
+            passwordInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value.length >= 8) {
+                        this.classList.add('border-green-300');
+                        this.classList.remove('border-red-300');
+                    } else if (this.value.length > 0) {
+                        this.classList.add('border-red-300');
+                        this.classList.remove('border-green-300');
+                    } else {
+                        this.classList.remove('border-green-300', 'border-red-300');
+                    }
+                });
+            });
+
+            // Add email validation (visual only)
+            const emailInputs = document.querySelectorAll('input[type="email"]');
+            emailInputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (this.value && !emailRegex.test(this.value)) {
+                        this.classList.add('border-red-300');
+                        this.classList.remove('border-green-300');
+                    } else if (this.value) {
+                        this.classList.add('border-green-300');
+                        this.classList.remove('border-red-300');
+                    } else {
+                        this.classList.remove('border-green-300', 'border-red-300');
+                    }
+                });
+            });
+
+            // Determine which form to show on page load based on Django context
+            const initialFormType = "{{ form_type }}"; 
+            if (initialFormType === 'register') {
+                showRegisterForm();
+            } else if (initialFormType === 'forgot_password') {
+                showForgotPassword();
+            } else {
+                showLoginForm(); 
+            }
+
+            // SweetAlert for successful login
+            const loginSuccess = "{{ login_success|default:'false' }}";
+            const loggedInUsername = "{{ logged_in_username|default:'' }}";
+            if (loginSuccess === 'true' && loggedInUsername) {
+                Swal.fire({
+                    title: `Welcome back, ${loggedInUsername}!`,
+                    text: 'You have successfully logged in to Fashion Admin.',
+                    icon: 'success',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        });
+    </script>
+</body>
+</html>

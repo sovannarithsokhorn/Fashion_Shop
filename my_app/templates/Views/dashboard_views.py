@@ -93,6 +93,10 @@ def dashboard(request):
     recent_activities.sort(key=lambda x: x['date'], reverse=True)
     recent_activities = recent_activities[:5] # Limit to top 5 after combining and sorting
 
+    # Retrieve SweetAlert flags from session and remove them
+    login_success = request.session.pop('login_success', False)
+    logged_in_username = request.session.pop('logged_in_username', '')
+
     context = {
         'total_sales_last_30_days': total_sales_last_30_days,
         'sales_percentage_change': sales_percentage_change,
@@ -103,5 +107,7 @@ def dashboard(request):
         'total_products_count': total_products_count, # Added total products count
         'total_categories_count': total_categories_count, # Added total categories count
         'recent_activities': recent_activities,
+        'login_success': login_success, # Pass to template
+        'logged_in_username': logged_in_username, # Pass to template
     }
     return render(request, "pages/dashboard.html", context)
