@@ -29,7 +29,7 @@
 
     <form method="POST" action="{% url 'review_edit' pk=review.pk %}">
         {% csrf_token %}
-        
+
         {% if general_error %}
             <p class="text-red-500 text-sm mb-4">{{ general_error }}</p>
         {% endif %}

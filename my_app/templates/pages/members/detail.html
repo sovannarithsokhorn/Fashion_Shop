@@ -1,0 +1,128 @@
+{% extends 'index.html' %}
+{% block title %}Member Details | Admin{% endblock %}
+
+{% block content %}
+<head>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Tailwind CSS configuration to match the index.html custom colors and font
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'accent-brown': '#7F5539', /* A rich, warm brown */
+                        'cream-white': '#FDFBF6', /* A soft, off-white */
+                        'muted-blue': '#6B7280',  /* A subtle, grayish blue */
+                        'cream-border': '#E5E7EB', /* A light border color for cream theme */
+                        'cream-light': '#F9FAFB',  /* A slightly darker cream for hover/background */
+                        'soft-brown': '#5C4033',   /* A deeper brown for text */
+                        'warm-gray': '#A0A0A0',    /* A warm gray for placeholder text */
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<div class="module p-4 sm:p-6 lg:p-8"> {# Consistent padding with index.html module #}
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl font-light text-gray-800 mb-2">Member Profile</h2> {# Using font-light for thin text #}
+            <p class="font-light text-muted-blue">Detailed information about the member</p> {# Using font-light for light text #}
+        </div>
+        <div class="flex space-x-4"> {# Container for multiple buttons #}
+            {# Edit button #}
+            <a href="{% url 'member_edit' pk=member.pk %}"
+               class="bg-blue-600 text-cream-white px-6 py-2 rounded-lg font-light hover:bg-blue-700 transition-colors duration-200 shadow-md inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Edit Member
+            </a>
+            {# Back button styled like the "Add New Member" button #}
+            <a href="{% url 'member_index' %}"
+               class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg font-light hover:bg-opacity-80 transition-colors duration-200 shadow-md inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Members
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-cream-white rounded-lg shadow-lg border border-cream-border overflow-hidden p-6 text-center max-w-2xl mx-auto"> {# Card styling consistent with index.html member cards #}
+        <!-- Profile Picture Section -->
+        <div class="flex flex-col items-center mb-6">
+            {% if member.profile_picture %}
+                {# Make the image clickable to view full size #}
+                <a href="{{ member.profile_picture.url }}" target="_blank" rel="noopener noreferrer">
+                    <img src="{{ member.profile_picture.url }}" alt="{{ member.first_name }} {{ member.last_name }} Profile Picture" class="w-28 h-28 rounded-full object-cover border-4 border-accent-brown shadow-md transform transition-transform duration-300 hover:scale-105 cursor-pointer">
+                </a>
+            {% else %}
+                {% comment %} Generate initials for placeholder if no image {% endcomment %}
+                {% with first_initial=member.first_name|default:''|first|upper last_initial=member.last_name|default:''|first|upper %}
+                    {% if first_initial or last_initial %}
+                        {% with initials=first_initial|add:last_initial|default:'NI' %}
+                            <img src="https://placehold.co/112x112/E5E7EB/A0A0A0?text={{ initials }}" alt="No Image" class="w-28 h-28 rounded-full object-cover border-4 border-accent-brown shadow-md transform transition-transform duration-300 hover:scale-105">
+                        {% endwith %}
+                    {% else %}
+                        <img src="https://placehold.co/112x112/E5E7EB/A0A0A0?text=No+Image" alt="No Image" class="w-28 h-28 rounded-full object-cover border-4 border-accent-brown shadow-md transform transition-transform duration-300 hover:scale-105">
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+            <p class="text-warm-gray text-sm mt-2">Profile Image</p>
+        </div>
+
+        <!-- Member Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-left">
+            <!-- Member ID -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">Member ID:</p>
+                <p class="text-gray-700">{{ member.pk }}</p>
+            </div>
+            <!-- First Name -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">First Name:</p>
+                <p class="text-gray-700">{{ member.first_name|default:"N/A" }}</p>
+            </div>
+            <!-- Last Name -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">Last Name:</p>
+                <p class="text-gray-700">{{ member.last_name|default:"N/A" }}</p>
+            </div>
+            <!-- Email -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">Email:</p>
+                <p class="text-blue-600 hover:underline cursor-pointer">{{ member.email|default:"N/A" }}</p>
+            </div>
+            <!-- Phone Number -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">Phone Number:</p>
+                <p class="text-gray-700">{{ member.phone_number|default:"N/A" }}</p>
+            </div>
+            <!-- Date of Birth -->
+            <div>
+                <p class="font-medium text-soft-brown text-sm">Date of Birth:</p>
+                <p class="text-gray-700">{{ member.date_of_birth|default:"N/A" }}</p>
+            </div>
+            <!-- Bio -->
+            <div class="md:col-span-2">
+                <p class="font-medium text-soft-brown text-sm">Bio:</p>
+                <p class="text-gray-700 text-justify leading-relaxed">{{ member.bio|default:"No bio available." }}</p>
+            </div>
+            <!-- Timestamps -->
+            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mt-4">
+                <div>
+                    <p class="font-medium text-soft-brown text-sm">Created At:</p>
+                    <p class="text-warm-gray text-xs">{{ member.created_at|date:"M d, Y H:i"|default:"N/A" }}</p>
+                </div>
+                <div>
+                    <p class="font-medium text-soft-brown text-sm">Updated At:</p>
+                    <p class="text-warm-gray text-xs">{{ member.updated_at|date:"M d, Y H:i"|default:"N/A" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

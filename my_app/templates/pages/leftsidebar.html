@@ -1,5 +1,5 @@
 {% load static %}
-<div class="fixed left-0 top-0 h-full w-64 bg-cream-white shadow-sm border-r border-cream-border flex flex-col"> {# Added flex-col for bottom alignment #}
+<div class="fixed left-0 top-0 h-full w-64 bg-cream-white shadow-sm border-r border-cream-border flex flex-col">
     <div class="p-6 border-b border-cream-border">
         <div class="flex justify-between items-center">
             <div>
@@ -36,11 +36,11 @@
     </div>
     {% endif %}
 
-    <nav class="mt-6 flex-1 overflow-y-auto"> {# Added flex-1 and overflow-y-auto #}
+    <nav class="mt-6 flex-1 overflow-y-auto">
         <div class="px-6 py-2">
             <p class="text-xs uppercase tracking-wider text-warm-gray light-text">Management</p>
         </div>
-        <a href="{% url 'dashboard' %}" {# Assuming 'dashboard' is your main dashboard URL #}
+        <a href="{% url 'dashboard' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#6366f1" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -48,7 +48,7 @@
             </svg>
             Dashboard
         </a>
-        <a href="{% url 'product_index' %}" {# CORRECTED: Directly link to the product index URL #}
+        <a href="{% url 'product_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#059669" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -56,7 +56,7 @@
             </svg>
             Products
         </a>
-        <a href="{% url 'order_index' %}" {# Keep showModule if you have a JS system for these #}
+        <a href="{% url 'order_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -72,7 +72,7 @@
             </svg>
             Customers
         </a>
-        <a href="{% url 'inventory_index' %}" {# NEW: Link to the Inventory Index URL #}
+        <a href="{% url 'inventory_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#ea580c" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -80,7 +80,7 @@
             </svg>
             Inventory
         </a>
-        <a href="{% url 'category_index' %}" {# Assuming category_index is a direct URL #}
+        <a href="{% url 'category_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#0891b2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -88,14 +88,21 @@
             </svg>
             Categories
         </a>
-        {# NEW: Brand Link #}
-        <a href="{% url 'brand_index' %}" {# Assuming 'brand_index' will be your brand listing URL #}
+        <a href="{% url 'brand_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="#6d28d9" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m8-10h1m-1 4h1m-1 4h1M3 21h18"/>
             </svg>
             Brands
+        </a>
+        <a href="{% url 'member_index' %}"
+           class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="#e11d48" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m3-2v-1c0-2.21 2.686-4 6-4s6 1.79 6 4v1m-6-8a4 4 0 100-8 4 4 0 000 8z"/>
+            </svg>
+            Members
         </a>
         <a href="{% url 'promotion_index' %}"
            class="nav-item flex items-center px-6 py-3 text-soft-brown hover:bg-warm-beige hover:text-accent-brown transition-colors duration-200 light-text">
@@ -117,7 +124,7 @@
 
     {# Logout Button at the very bottom (NEW POSITION) #}
     {% if request.user.is_authenticated %}
-    <div class="mt-auto p-6 border-t border-cream-border"> {# mt-auto pushes it to the bottom #}
+    <div class="mt-auto p-6 border-t border-cream-border">
         <a href="{% url 'logout' %}"
            class="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-cream-white rounded-lg light-text hover:bg-red-600 transition-colors duration-200">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

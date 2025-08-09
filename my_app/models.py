@@ -1,11 +1,8 @@
-# admin_dashboard/models.py (assuming your app is named 'admin_dashboard')
-
+# admin_dashboard/models.py
 from django.db import models
-from django.template.context_processors import static
-from django.utils import timezone
-from django.db.models import Sum # Added for total_stock property
+from django.db.models import Sum
 
-# Choices for ENUM-like fields
+# --- CHOICES FOR ENUM-LIKE FIELDS ---
 GENDER_CHOICES = [
     ('M', 'Men'),
     ('W', 'Women'),
@@ -39,6 +36,45 @@ DISCOUNT_TYPE_CHOICES = [
     ('FREE_SHIPPING', 'Free Shipping'),
 ]
 
+# --- APP MANAGEMENT MODELS ---
+
+class Member(models.Model):
+    """
+    Represents a member who creates/manages the application. This model is
+    standalone and not linked to Django's built-in User model. It stores
+    information about the app administrators or creators.
+    """
+    member_id = models.AutoField(primary_key=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=255, unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='member_profiles/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Member"
+        verbose_name_plural = "Members"
+        ordering = ['last_name', 'first_name']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.email})"
+
+    @property
+    def profile_picture_url(self):
+        """
+        Returns the URL of the profile picture, or a default image if none is set.
+        """
+        if self.profile_picture and hasattr(self.profile_picture, 'url'):
+            return self.profile_picture.url
+        # Provide a path to a default image if no profile picture is uploaded
+        return "/static/images/default_member_profile.png"
+
+# --- E-COMMERCE MODELS ---
+
 class Brand(models.Model):
     brand_id = models.AutoField(primary_key=True)
     brand_name = models.CharField(max_length=100, unique=True)
@@ -58,8 +94,8 @@ class Category(models.Model):
     category_name = models.CharField(max_length=100, unique=True)
     parent_category = models.ForeignKey(
         'self',
-        on_delete=models.CASCADE, # Changed to CASCADE
-        null=True, # Keep null=True as it can be a top-level category
+        on_delete=models.CASCADE,
+        null=True,
         blank=True,
         related_name='subcategories'
     )
@@ -77,8 +113,8 @@ class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, related_name='products') # Changed to CASCADE
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, related_name='products') # Changed to CASCADE
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, related_name='products')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, related_name='products')
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     material = models.CharField(max_length=100, blank=True, null=True)
@@ -97,7 +133,7 @@ class Product(models.Model):
 
     @property
     def total_stock(self):
-        # Calculate total stock from all variants
+        """Calculates the total quantity in stock across all variants of this product."""
         return self.variants.aggregate(total_quantity=Sum('quantity_in_stock'))['total_quantity'] or 0
 
 
@@ -105,14 +141,14 @@ class ProductVariant(models.Model):
     variant_id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     color = models.CharField(max_length=50)
-    size = models.CharField(max_length=50) # Can be 'S', 'M', 'L', 'XL', or specific numbers like '28', 'EU 38'
+    size = models.CharField(max_length=50)
     sku = models.CharField(max_length=100, unique=True, help_text="Stock Keeping Unit")
     quantity_in_stock = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Product Variant"
         verbose_name_plural = "Product Variants"
-        unique_together = ('product', 'color', 'size') # A product can't have duplicate color/size variants
+        unique_together = ('product', 'color', 'size')
         ordering = ['product__product_name', 'color', 'size']
 
     def __str__(self):
@@ -123,8 +159,8 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     variant = models.ForeignKey(
         ProductVariant,
-        on_delete=models.CASCADE, # Changed to CASCADE
-        null=True, # Keep null=True as image might not be variant-specific
+        on_delete=models.CASCADE,
+        null=True,
         blank=True,
         related_name='images',
         help_text="Optional: Link image to a specific variant if it's variant-specific"
@@ -144,9 +180,11 @@ class ProductImage(models.Model):
 
     @property
     def image_url(self):
+        """Returns the URL of the product image, or a default image if none is set."""
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
-        return "#" # Fallback if no image
+        # Provide a path to a default image if no product image is uploaded
+        return "/static/images/default_product.png"
 
 
 class Customer(models.Model):
@@ -158,8 +196,8 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     registration_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='customer_profiles/', null=True, blank=True) # NEW FIELD
-    notes = models.TextField(blank=True, null=True, help_text="Internal notes about the customer") # NEW FIELD
+    profile_picture = models.ImageField(upload_to='customer_profiles/', null=True, blank=True)
+    notes = models.TextField(blank=True, null=True, help_text="Internal notes about the customer")
 
     class Meta:
         verbose_name = "Customer"
@@ -171,9 +209,11 @@ class Customer(models.Model):
 
     @property
     def profile_picture_url(self):
+        """Returns the URL of the customer's profile picture, or a default image if none is set."""
         if self.profile_picture and hasattr(self.profile_picture, 'url'):
             return self.profile_picture.url
-        return static('images/default_profile.png') # Provide a default image path
+        # Provide a path to a default image if no profile picture is uploaded
+        return "/static/images/default_profile.png"
 
 
 class Address(models.Model):
@@ -198,20 +238,20 @@ class Address(models.Model):
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, related_name='orders') # Changed to CASCADE
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, related_name='orders')
     order_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.ForeignKey(
         Address,
-        on_delete=models.CASCADE, # Changed to CASCADE
-        null=True, # Keep null=True, as address might be optional or deleted separately
+        on_delete=models.CASCADE,
+        null=True,
         related_name='shipping_orders',
         help_text="Address used for shipping this order"
     )
     billing_address = models.ForeignKey(
         Address,
-        on_delete=models.CASCADE, # Changed to CASCADE
-        null=True, # Keep null=True, as address might be optional or deleted separately
+        on_delete=models.CASCADE,
+        null=True,
         related_name='billing_orders',
         help_text="Address used for billing this order"
     )
@@ -226,19 +266,20 @@ class Order(models.Model):
         ordering = ['-order_date']
 
     def __str__(self):
+        # Corrected f-string for Order __str__
         return f"Order #{self.order_id} by {self.customer.email if self.customer else 'Guest'}"
 
 class OrderItem(models.Model):
     order_item_id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, null=True, related_name='order_items') # Changed to CASCADE
+    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, null=True, related_name='order_items')
     quantity = models.IntegerField(default=1)
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price of the item at the time of purchase")
 
     class Meta:
         verbose_name = "Order Item"
         verbose_name_plural = "Order Items"
-        unique_together = ('order', 'variant') # An order should not have the same variant twice (quantity adjusted)
+        unique_together = ('order', 'variant')
         ordering = ['order__order_id']
 
     def __str__(self):
@@ -246,8 +287,7 @@ class OrderItem(models.Model):
 
 class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
-    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, null=True, blank=True, related_name='cart') # Changed to CASCADE
-    # If customer is null, it can represent a guest cart (e.g., linked by session ID)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, null=True, blank=True, related_name='cart')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -262,14 +302,14 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart_item_id = models.AutoField(primary_key=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
-    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name='cart_items') # Changed to CASCADE
+    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name='cart_items')
     quantity = models.IntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Cart Item"
         verbose_name_plural = "Cart Items"
-        unique_together = ('cart', 'variant') # A cart should not have the same variant twice
+        unique_together = ('cart', 'variant')
         ordering = ['cart__cart_id', 'added_at']
 
     def __str__(self):
@@ -278,7 +318,7 @@ class CartItem(models.Model):
 class Review(models.Model):
     review_id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, related_name='reviews') # Changed to CASCADE
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, related_name='reviews')
     rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], help_text="Rating from 1 to 5 stars")
     review_text = models.TextField(blank=True, null=True)
     review_date = models.DateTimeField(auto_now_add=True)
@@ -287,7 +327,7 @@ class Review(models.Model):
     class Meta:
         verbose_name = "Review"
         verbose_name_plural = "Reviews"
-        unique_together = ('product', 'customer') # One review per customer per product
+        unique_together = ('product', 'customer')
         ordering = ['-review_date']
 
     def __str__(self):
@@ -308,7 +348,7 @@ class Promotion(models.Model):
 
     class Meta:
         verbose_name = "Promotion"
-        verbose_name_plural = "Promotions" # Corrected from verbose_plural
+        verbose_name_plural = "Promotions"
         ordering = ['-start_date']
 
     def __str__(self):
@@ -323,8 +363,8 @@ class AppliedPromotion(models.Model):
 
     class Meta:
         verbose_name = "Applied Promotion"
-        verbose_name_plural = "Applied Promotions" # Corrected from verbose_plural
-        unique_together = ('order', 'promotion') # A promotion can only be applied once per order directly
+        verbose_name_plural = "Applied Promotions"
+        unique_together = ('order', 'promotion')
         ordering = ['order__order_id', '-applied_at']
 
     def __str__(self):
@@ -332,15 +372,16 @@ class AppliedPromotion(models.Model):
 
 class Wishlist(models.Model):
     wishlist_id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='wishlist_items')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='wishlists')
     variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name='wishlists')
     added_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Wishlist Item"
         verbose_name_plural = "Wishlist Items"
-        unique_together = ('customer', 'variant') # A customer can only add a specific variant once to their wishlist
+        unique_together = ('customer', 'variant')
         ordering = ['customer__email', '-added_date']
 
     def __str__(self):
+        # Corrected f-string syntax for Wishlist __str__
         return f"{self.customer.email}'s Wishlist: {self.variant.product.product_name} ({self.variant.sku})"

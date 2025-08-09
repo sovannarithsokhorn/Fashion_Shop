@@ -1,0 +1,150 @@
+{% extends 'index.html' %}
+{% block title %}Members | Admin{% endblock %}
+
+{% block content %}
+<head>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Base background color, can be overridden by your main index.html */
+            background-color: #f8f8f8;
+        }
+        /* Custom font weights if 'thin-text' and 'light-text' are not directly mapped by Tailwind's font-weight classes */
+        .thin-text {
+            font-weight: 100; /* Extra Light */
+        }
+        .light-text {
+            font-weight: 300; /* Light */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'accent-brown': '#7F5539', /* A rich, warm brown */
+                        'cream-white': '#FDFBF6', /* A soft, off-white */
+                        'muted-blue': '#6B7280',  /* A subtle, grayish blue */
+                        'cream-border': '#E5E7EB', /* A light border color for cream theme */
+                        'cream-light': '#F9FAFB',  /* A slightly darker cream for hover/background */
+                        'soft-brown': '#5C4033',   /* A deeper brown for text */
+                        'warm-gray': '#A0A0A0',    /* A warm gray for placeholder text */
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<div class="module p-4 sm:p-6 lg:p-8"> {# Added padding for better spacing #}
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl thin-text text-gray-800 mb-2">Member Management</h2>
+            <p class="light-text text-muted-blue">Manage registered users</p>
+        </div>
+        {# Button to navigate to the member creation page #}
+        <a href="{% url 'member_create' %}"
+           class="bg-accent-brown text-cream-white px-6 py-2 rounded-lg light-text hover:bg-opacity-80 transition-colors duration-200 shadow-md"> {# Added shadow for button #}
+            + Add New Member
+        </a>
+    </div>
+
+    {# Django Messages Display #}
+    {% if messages %}
+        <ul class="messages mb-6">
+            {% for message in messages %}
+                <li class="p-3 mb-2 rounded-lg text-sm {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-50 text-red-600 border border-red-200{% elif 'warning' in message.tags %}bg-yellow-50 text-yellow-600 border border-yellow-200{% else %}bg-blue-100 text-blue-800{% endif %} shadow-sm"> {# Added shadow for messages #}
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Members Grid (Card Layout) #}
+    {% if members %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for member in members %}
+                {# Make the entire card clickable to view details #}
+                <div class="relative bg-cream-white rounded-lg shadow-lg border border-cream-border overflow-hidden flex flex-col items-center p-6 text-center
+                          hover:shadow-xl hover:border-accent-brown transition-all duration-200 group"> {# Added relative positioning for the delete button #}
+
+                    {# Delete button (red X) #}
+                    <button type="button"
+                            class="absolute top-2 right-2 p-1 text-red-500 hover:text-red-700 focus:outline-none z-20"
+                            onclick="event.stopPropagation(); confirmDelete('{{ member.pk }}', '{{ member.first_name|escapejs }} {{ member.last_name|escapejs }}')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    {# Clickable area for viewing details (excluding the delete button) #}
+                    <a href="{% url 'member_detail' pk=member.pk %}" class="block w-full h-full absolute inset-0 z-10"></a>
+
+                    <div class="w-24 h-24 rounded-full bg-cream-light flex items-center justify-center mb-4 overflow-hidden mt-4"> {# Added mt-4 to push content down from the delete button #}
+                        {# Conditional display for profile picture or placeholder SVG #}
+                        {% if member.profile_picture %}
+                            <img src="{{ member.profile_picture.url }}" alt="{{ member.first_name }} {{ member.last_name }} Profile Picture" class="w-full h-full object-cover rounded-full">
+                        {% else %}
+                            {# Avatar Placeholder SVG - Using text-soft-brown for color #}
+                            <svg class="w-16 h-16 text-soft-brown" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 20.993c-.341-2.909-2.072-5.361-4.707-6.914l-2.029-1.127c-.779-.434-1.258-1.267-1.258-2.193v-1.16c1.697-.738 2.92-2.385 2.92-4.304C18.92 2.69 16.592 0 13.5 0S8.08 2.69 8.08 6.3c0 1.919 1.223 3.566 2.92 4.304v1.16c0 .926-.479 1.759-1.258 2.193l-2.029 1.127C2.959 15.632 1.228 18.084.887 20.993L.01 24h23.98l-.007-3.007z" />
+                            </svg>
+                        {% endif %}
+                    </div>
+
+                    <h3 class="light-text text-accent-brown text-lg font-semibold group-hover:text-soft-brown">{{ member.first_name }} {{ member.last_name }}</h3>
+                    {% if member.bio %}
+                        <p class="text-sm text-warm-gray mb-4 line-clamp-3">{{ member.bio }}</p> {# Displaying bio here, with line-clamp to limit lines #}
+                    {% else %}
+                        <p class="text-sm text-warm-gray mb-4 italic">No bio available.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-cream-white rounded-lg shadow-sm border border-cream-border p-6 text-center">
+            <p class="light-text text-warm-gray">No members found.</p>
+        </div>
+    {% endif %}
+</div>
+
+<form id="deleteMemberForm" method="post" action="" class="hidden">
+    {% csrf_token %}
+</form>
+
+<script>
+    // Function to confirm deletion using SweetAlert2
+    function confirmDelete(memberId, memberName) {
+        Swal.fire({
+            title: 'Confirm Deletion',
+            text: `Are you sure you want to delete member "${memberName}"? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#DC2626', // Red-600
+            cancelButtonColor: '#6B7280', // Muted-blue (gray)
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-lg shadow-xl',
+                title: 'text-lg font-semibold text-gray-900',
+                content: 'text-gray-700',
+                confirmButton: 'px-4 py-2 text-white rounded-lg hover:bg-red-700 transition',
+                cancelButton: 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const deleteForm = document.getElementById('deleteMemberForm');
+                deleteForm.action = `/members/delete/${memberId}/`; // Set the form action dynamically
+                deleteForm.submit(); // Submit the form to trigger deletion
+            }
+        });
+    }
+</script>
+{% endblock content %}
